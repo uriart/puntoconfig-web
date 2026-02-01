@@ -1,0 +1,24 @@
+---
+interface Props {
+  type?: 'info' | 'tip' | 'warning';
+}
+
+const { type = 'info' } = Astro.props;
+
+const styles = {
+  info: "bg-[#74c7ec]/10 border-[#74c7ec] text-[#1e66f5] dark:text-[#74c7ec]",
+  tip: "bg-[#a6e3a1]/10 border-[#a6e3a1] text-[#40a02b] dark:text-[#a6e3a1]",
+  warning: "bg-[#fab387]/10 border-[#fab387] text-[#df8e1d] dark:text-[#fab387]"
+};
+
+const icons = {
+  info: "ℹ️",
+  tip: "💡",
+  warning: "⚠️"
+};
+---
+
+<div class={`p-4 my-6 border-l-4 rounded-r-xl ${styles[type]}`}>
+  <!--span class="mr-2">{icons[type]}</span-->
+  <slot />
+</div>

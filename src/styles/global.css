@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definición de la paleta Catppuccin Mocha/Latte */
+:root {
+  --ctp-rosewater: #f5e0dc; --ctp-flamingo: #f2cdcd; --ctp-pink: #f5c2e7;
+  --ctp-mauve: #cba6f7; --ctp-red: #f38ba8; --ctp-maroon: #eba0ac;
+  --ctp-peach: #fab387; --ctp-yellow: #f9e2af; --ctp-green: #a6e3a1;
+  --ctp-teal: #94e2d5; --ctp-sky: #89dceb; --ctp-sapphire: #74c7ec;
+  --ctp-blue: #89b4fa; --ctp-lavender: #b4befe; --ctp-text: #cdd6f4;
+  --ctp-subtext1: #bac2de; --ctp-subtext0: #a6adc8; --ctp-overlay2: #9399b2;
+  --ctp-overlay1: #7f849c; --ctp-overlay0: #6c7086; --ctp-surface2: #585b70;
+  --ctp-surface1: #45475a; --ctp-surface0: #313244; --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825; --ctp-crust: #11111b;
+}
+
+html {
+  overflow-y: scroll;
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html, body { @apply size-full; }
+
+body {
+  @apply font-sans antialiased;
+  @apply flex flex-col;
+  /* Modo Claro: Latte | Modo Oscuro: Mocha Base */
+  @apply bg-[#eff1f5] dark:bg-[#1e1e2e];
+  @apply text-[#4c4f69] dark:text-[#cdd6f4];
+}
+
+header {
+  @apply fixed top-0 left-0 right-0 z-50 py-5;
+  @apply bg-[#eff1f5]/80 dark:bg-[#1e1e2e]/80;
+  @apply border-b border-[#dce0e8] dark:border-[#313244];
+  @apply backdrop-blur-md;
+}
+
+main { @apply flex-1 py-32; }
+
+footer {
+  @apply py-8 text-sm border-t border-[#dce0e8] dark:border-[#313244];
+  @apply text-[#7c7f93] dark:text-[#9399b2];
+}
+
+article {
+  @apply max-w-full prose dark:prose-invert prose-img:rounded-2xl;
+  @apply prose-headings:font-bold prose-headings:tracking-tight;
+  /* Color Mauve para los títulos, muy icónico de Catppuccin */
+  @apply prose-headings:text-[#8839ef] dark:prose-headings:text-[#cba6f7];
+  @apply prose-p:leading-relaxed;
+  
+  /* Bloques de código con sabor Mantle */
+  @apply prose-pre:bg-[#e6e9ef] dark:prose-pre:bg-[#181825];
+  @apply prose-pre:border prose-pre:border-[#dce0e8] dark:prose-pre:border-[#313244];
+}
+
+@layer utilities {
+  /* Enlaces en Sapphire: un azul vibrante pero suave */
+  article a {
+    @apply font-semibold text-[#209fb5] dark:text-[#74c7ec] no-underline;
+    @apply border-b-2 border-[#209fb5]/20 dark:border-[#74c7ec]/20;
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  article a:hover {
+    @apply border-[#209fb5] dark:border-[#74c7ec];
+    @apply bg-[#209fb5]/10 dark:bg-[#74c7ec]/10;
+  }
+
+  /* Tags con colores variados estilo Catppuccin */
+  .tag {
+    @apply px-2 py-1 rounded text-xs font-mono;
+    @apply bg-[#ccd0da] dark:bg-[#313244] text-[#4c4f69] dark:text-[#cdd6f4];
+  }
+}
+
+/* Animaciones */
+.animate {
+  @apply opacity-0 translate-y-2;
+  @apply transition-all duration-500 ease-out;
+}
+
+.animate.show { @apply opacity-100 translate-y-0; }
+
+html #back-to-top {
+  @apply opacity-0 pointer-events-none;
+}
+
+html.scrolled #back-to-top {
+  @apply opacity-100 pointer-events-auto;
+}

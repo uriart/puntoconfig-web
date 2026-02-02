@@ -1,0 +1,110 @@
+---
+title: "📱 Kube-Phone: Un clúster de Kubernetes con smartphones viejos"
+description: "Reciclando hardware móvil para montar un clúster K3s multi-arquitectura (ARMv7 y Aarch64) con PostmarketOS."
+date: "2025-10-09"
+---
+
+import { Image } from "astro:assets";
+import phoneCluster from "./phone-cluster.jpg";
+
+¿Qué haces con esos móviles que tienes olvidados en un cajón? En este proyecto, convertí tres smartphones antiguos en un clúster de Kubernetes completamente funcional. Es una forma excelente de aprender sobre **arquitecturas ARM**, **redes bare-metal** y **alta disponibilidad** con un consumo energético mínimo.
+
+<Image
+  src={phoneCluster}
+  alt="Phone cluster"
+  width={600}
+  height={400}
+  format="webp"
+/>
+
+## 🛠️ Fase 1: El Sistema Operativo (PostmarketOS)
+
+Para que un móvil se comporte como un servidor real, necesitamos un Linux "de verdad". [PostmarketOS](https://postmarketos.org/) es una distribución basada en Alpine Linux optimizada para dispositivos táctiles, pero que brilla en su versión de consola.
+
+### Hardware utilizado
+- **Master (POCO F1):** Arquitectura `Aarch64` (Potencia de sobra para el control-plane).
+- **Worker 1 (Google Nexus 5):** Arquitectura `Armv7` (Un veterano que aún da guerra).
+- **Worker 2 (Xiaomi Mi 6):** Actualmente fuera de servicio, pero listo para escalar.
+
+> **⚠️ Importante:** Antes de empezar, debes desbloquear el bootloader de cada dispositivo. Es un proceso que puede variar según la marca y conlleva riesgos.
+
+### Instalación clave
+Durante el asistente de instalación de postmarketOS, es vital seleccionar la interfaz **`console`**. No queremos malgastar RAM en un entorno gráfico que no vamos a ver. Una vez flasheado, accedemos por SSH mediante la IP de emergencia vía USB:
+
+```bash
+ssh user@172.16.42.1
+```
+Tip de PuntoConfig: Desactiva el firewall temporalmente para evitar que nftables bloquee el tráfico interno del clúster mientras configuras los nodos.
+
+## Fase 2: El Clúster (K3s)
+He elegido K3s de Rancher por ser la distribución de Kubernetes más ligera y eficiente para dispositivos con recursos limitados.
+
+### Instalación del Master y Workers
+El proceso es extremadamente sencillo gracias al script oficial:
+
+*   En el Master: Ejecuta el instalador y recupera el `node-token` en `/var/lib/rancher/k3s/server/node-token`.
+*   En los Workers: Lanza el script apuntando a la IP del Master y usando el token obtenido.
+
+> **ℹ️ Ojo con el Kubeconfig:** Al descargar el archivo `/etc/rancher/k3s/k3s.yaml` a tu PC local, recuerda cambiar `127.0.0.1` por la IP privada de tu dispositivo master para poder usar `kubectl` desde fuera.
+
+### El reto de la Multi-Arquitectura
+Este clúster es un híbrido. El POCO F1 es 64 bits (`aarch64`) y el Nexus 5 es 32 bits (`armv7`). Al desplegar aplicaciones, debes usar imágenes multi-arch. Si intentas ejecutar un contenedor de 64 bits en el Nexus 5, el Pod fallará con un error de ejecución.
+
+## Fase 3: Networking y Acceso Externo
+Aquí tenemos dos caminos según tus necesidades:
+
+### Opción A: Cloudflare Tunnel (Acceso Público)
+Ideal para exponer el clúster sin abrir puertos en tu router. Como el Nexus 5 es `armv7`, la imagen oficial de `cloudflared` no funcionará. Debemos usar una compatible en nuestro deployment: `ghcr.io/brenner-tobias/cloudflared/armv7`.
+
+### Opción B: MetalLB (Acceso Local)
+Si prefieres mantenerlo todo en tu red local con IPs virtuales, MetalLB es la solución. Se encarga de asignar una IP de tu rango LAN (ej. `192.168.1.240`) a tu Ingress Controller.
+
+## Fase 4: Tráfico con Traefik e Ingress
+K3s viene con Traefik instalado por defecto. Para asegurar que nuestro clúster no caiga si reiniciamos un móvil, escalamos el despliegue a alta disponibilidad:
+
+````bash
+kubeclt edit deployment traefik -n kube-system
+# Cambia spec.replicas a 2
+````
+De esta forma, si el Nexus 5 se desconecta, el Master seguirá sirviendo tráfico a través de su propia instancia de Traefik.
+
+## Fase 5: Visualización con Kite Dashboard
+Para gestionar el clúster visualmente sin estar pegado a la terminal, instalé Kite Dashboard. Es extremadamente ligero, perfecto para este setup.
+
+### Instalación con Helm:
+````bash
+helm repo add kite https://zxh326.github.io/kite/
+helm install kite kite/kite --set basePath=/kite --namespace default
+````
+Finalmente, creamos un Ingress para mapear nuestro dominio (ej. `cluster.puntoconfig.dev/kite`) hacia el servicio de Kite.
+
+## Conclusión
+Ver este clúster funcionar es casi mágico. Tenemos dispositivos de hace más de 10 años trabajando en conjunto, repartiendo carga y respondiendo a peticiones de internet.
+
+¿Merece la pena? Como entorno de producción, no. Como laboratorio de aprendizaje de Kubernetes, arquitecturas ARM y optimización de recursos, es inmejorable.
+
+> **💡 Tip Final:** ¿Tienes un móvil viejo por casa? ¡No lo tires! Conviértelo en tu primer nodo de Kubernetes.
+
+---
+## 📚 Fuentes y Herramientas
+
+Para la realización de este proyecto se han consultado las siguientes fuentes oficiales y utilizado las siguientes herramientas de la comunidad:
+
+### Sistemas y Wiki
+* **[PostmarketOS Wiki](https://wiki.postmarketos.org/wiki/Devices)**: Referencia principal para la compatibilidad de dispositivos (Xiaomi POCO F1, Nexus 5, Mi 6).
+* **[PostmarketOS Installation Guide](https://wiki.postmarketos.org/wiki/Installation)**: Documentación oficial para el flasheo e inicialización.
+* **[Unlocking Bootloaders](https://wiki.postmarketos.org/wiki/Unlocking_Bootloaders)**: Guía esencial de seguridad y desbloqueo.
+
+### Kubernetes (K3s) y Networking
+* **[K3s Official Documentation](https://docs.k3s.io/quick-start)**: Instalación ligera de Kubernetes.
+* **[MetalLB Project](https://metallb.io/)**: Balanceador de carga para entornos bare-metal.
+* **[Cloudflare Tunnel Deployment](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/deployment-guides/kubernetes/)**: Guía para exponer servicios sin abrir puertos.
+* **[Traefik Ingress Controller](https://doc.traefik.io/traefik/)**: Gestión de tráfico y proxy inverso.
+
+### Herramientas de Gestión y Seguridad
+* **[Kite Dashboard](https://github.com/zxh326/kite)**: Interfaz web ligera para visualización del clúster.
+* **[How to Secure a Linux Server](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server)**: Guía recomendada de securización (Hardening).
+
+### Software de Control
+* **[kubectl](https://kubernetes.io/docs/reference/kubectl/)**: Línea de comandos de Kubernetes.
+* **[k9s](https://k9scli.io/)**: Interfaz de terminal (TUI) para gestionar el clúster con estilo.

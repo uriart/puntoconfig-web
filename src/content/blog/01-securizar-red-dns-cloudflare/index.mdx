@@ -1,11 +1,19 @@
 ---
-title: "Cómo securizar tu red doméstica en 2 minutos con DNS"
+title: "🛡️ Cómo securizar tu red doméstica en 2 minutos con DNS"
 description: "Olvídate de webs maliciosas y contenido no deseado configurando los DNS 1.1.1.3 de Cloudflare."
-date: "2026-02-01"
+date: "2025-12-01"
 tags: ["Seguridad", "Redes", "Tutorial"]
 ---
 
-Muchos usan los DNS de Google o los de su operadora, pero si quieres un filtro de seguridad real sin instalar nada, **Cloudflare 1.1.1.3** es la clave.
+import { Image } from "astro:assets";
+import dhcp from "./dhcp.png";
+
+En la mayoria de hogares, el router es el encargado de asignar DNS a los dispositivos de la red local, es por eso que en casa he configurado los DNS de router para proteger a mi familia y a mi de:
+
+* **Webs maliciosas:** Malware, phishing, spam.
+* **Contenido no deseado:** Bloqueo de sitios para adultos.
+
+Olvídate de instalar software adicional; con **Cloudflare 1.1.1.3** tienes un filtro de seguridad real a nivel de red, rápido y gratuito. 
 
 ### ¿Por qué la 1.1.1.3?
 A diferencia de la clásica 1.1.1.1, esta IP incluye:
@@ -18,6 +26,19 @@ Solo tienes que cambiar los DNS en tu router o en tu tarjeta de red por estos:
 - **Primario:** `1.1.1.3`
 - **Secundario:** `1.0.0.3`
 
+Es recomendable modificar los DNS directamente en la configuración del DHCP en el router. De esta forma, cada vez que se conecte un dispositivo nuevo a la red, utilizará los DNS definidos a menos que se configure explícitamente otra cosa en el dispositivo. Esta configuración suele estar en `Red Local > LAN > Servidor DHCP`.
+
+<Image
+  src={dhcp}
+  alt="DHCP"
+  width={600}
+  height={400}
+  format="webp"
+/>
+
 > **Tip de PuntoConfig:** Si usas IPv6, los valores son `2606:4700:4700::1113` y `2606:4700:4700::1003`.
 
-Una vez aplicado, intenta entrar en [https://nudity.testcategory.com/](https://nudity.testcategory.com/) y verás cómo Cloudflare te corta el paso. ¡Seguridad invisible y gratuita!
+Una vez aplicado, intenta entrar en [https://malware.testcategory.com/](https://malware.testcategory.com/) y verás cómo Cloudflare te corta el paso. ¡Seguridad invisible y gratuita!
+
+---
+**Fuente original:** [https://developers.cloudflare.com/1.1.1.1/setup/](https://developers.cloudflare.com/1.1.1.1/setup/)

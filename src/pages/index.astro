@@ -22,7 +22,7 @@ const projects = (await getCollection("projects"))
     <section class="animate space-y-4 pt-8">
       <div class="flex items-center gap-4">
         <div class="size-14 rounded-xl bg-[#cba6f7] flex items-center justify-center text-2xl shadow-lg shadow-[#cba6f7]/20">
-          ⚙️
+          <span class="filter brightness-50 contrast-125">⚙️</span>
         </div>
         <h4 class="font-bold text-2xl text-[#4c4f69] dark:text-[#cdd6f4]">
           PuntoConfig<span class="text-[#8839ef] dark:text-[#cba6f7]">.dev</span>
@@ -72,23 +72,52 @@ const projects = (await getCollection("projects"))
           ))}
         </ul>
       </section>
+      
+      <section id="newsletter-section" class="animate p-8 rounded-2xl bg-[#8839ef]/5 dark:bg-[#cba6f7]/5 border-2 border-[#8839ef]/10 dark:border-[#cba6f7]/10 space-y-4">
+        <h5 class="font-bold text-[#8839ef] dark:text-[#cba6f7]">¿Quieres más configuraciones?</h5>
+        <p class="text-sm text-[#4c4f69] dark:text-[#bac2de]">Únete a la newsletter. Envío tips técnicos directos a tu terminal.</p>
 
-      <section class="animate p-8 rounded-2xl bg-[#8839ef]/5 dark:bg-[#cba6f7]/5 border-2 border-[#8839ef]/10 dark:border-[#cba6f7]/10 space-y-4">
-        <h5 class="font-bold text-[#8839ef] dark:text-[#cba6f7]">
-          ¿Quieres más configuraciones?
-        </h5>
-        <p class="text-sm">
-          Únete a la newsletter. Envío un tip técnico práctico cada semana. Directo a tu terminal (o bandeja de entrada).
-        </p>
-        <div class="flex flex-col sm:flex-row gap-2 pt-2">
-          <input 
-            type="email" 
-            placeholder="admin@ejemplo.com" 
-            class="flex-1 px-4 py-2 rounded-lg bg-white dark:bg-[#181825] border border-[#dce0e8] dark:border-[#313244] focus:ring-2 focus:ring-[#cba6f7] outline-none text-sm transition-all"
-          />
-          <button class="px-6 py-2 rounded-lg bg-[#4c4f69] dark:bg-[#cba6f7] text-[#eff1f5] dark:text-[#11111b] font-bold text-sm hover:opacity-90 transition-opacity">
-            Suscribirme
-          </button>
+        <div id="sib-form-container" class="w-full relative">
+          
+          <div id="success-message" class="hidden absolute inset-0 bg-white dark:bg-[#1e1e2e] flex flex-col items-center justify-center text-center rounded-lg z-10 p-4">
+              <div class="text-green-500 mb-2">
+                  <svg viewBox="0 0 512 512" class="w-10 h-10 fill-current mx-auto"><path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 464c-118.664 0-216-96.055-216-216 0-118.663 96.055-216 216-216 118.664 0 216 96.055 216 216 0 118.663-96.055 216-216 216zm141.63-274.961L217.15 376.071c-4.705 4.667-12.303 4.637-16.97-.068l-85.878-86.572c-4.667-4.705-4.637-12.303.068-16.97l8.52-8.451c4.705-4.667 12.303-4.637 16.97.068l68.976 69.533 163.441-162.13c4.705-4.667 12.303-4.637 16.97.068l8.451 8.52c4.668 4.705 4.637 12.303-.068 16.97z" /></svg>
+              </div>
+              <p class="text-lg font-bold text-[#4c4f69] dark:text-[#cdd6f4]">¡Suscrito correctamente!</p>
+              <p class="text-sm text-gray-500">Revisa tu bandeja de entrada.</p>
+          </div>
+
+          <form id="custom-sib-form" class="flex flex-col gap-4 transition-opacity duration-300">
+            
+            <div class="flex flex-col sm:flex-row gap-2">
+              <div class="flex-1">
+                <input 
+                  class="w-full px-4 py-2 rounded-lg bg-white dark:bg-[#181825] border border-[#dce0e8] dark:border-[#313244] focus:ring-2 focus:ring-[#cba6f7] outline-none text-sm transition-all text-[#4c4f69] dark:text-[#cdd6f4]" 
+                  type="email" 
+                  id="EMAIL" 
+                  name="EMAIL" 
+                  autocomplete="off" 
+                  placeholder="admin@ejemplo.com" 
+                  required 
+                />
+              </div>
+              
+              <button 
+                id="submit-btn"
+                type="submit"
+                class="px-6 py-2 rounded-lg bg-[#4c4f69] dark:bg-[#cba6f7] text-[#eff1f5] dark:text-[#11111b] font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 whitespace-nowrap h-fit self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                SUSCRIBIRSE
+              </button>
+            </div>
+
+            <div class="flex justify-start -ml-1 transform scale-90 origin-top-left">
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAACWu3dd5IpwFGB1r" data-callback="onCaptchaSuccess"></div>
+            </div>
+
+            <input type="hidden" name="locale" value="es">
+            <input type="hidden" name="email_address_check" value="">
+          </form>
         </div>
       </section>
 
@@ -120,3 +149,49 @@ const projects = (await getCollection("projects"))
     </div>
   </Container>
 </PageLayout>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script is:inline>
+  const BREVO_URL = "https://03271073.sibforms.com/serve/MUIFAMhMXZZcfRJPmTCvttdEvAmjTf7w8KuHjTwvADTNSiAedNhGiET7RJyZkP8yAzmuTi7ikprRIY_nSPSsLJzYxlt38yYdJmAhfDT_eA_wy9zOmzXdjxNi5ZxM3r7_kQrWe1KmYvA9CrvoNvFCEh2HqUY0JUxPgmGrefNDsnT6rr6KzINPThreezxoPVkweC-enVKxgmpylrzTnA==";
+
+  const form = document.getElementById('custom-sib-form');
+  const successMsg = document.getElementById('success-message');
+  const btn = document.getElementById('submit-btn');
+  let captchaToken = null;
+
+  window.onCaptchaSuccess = function(token) {
+    captchaToken = token;
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); 
+
+    if (!captchaToken) {
+      alert("Por favor, completa el captcha.");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Enviando...";
+
+    const formData = new FormData(form);
+    
+    try {
+      await fetch(BREVO_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors' 
+      });
+
+      form.classList.add('opacity-0', 'pointer-events-none');
+      successMsg.classList.remove('hidden');
+      
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al suscribirse. Inténtalo de nuevo.");
+      btn.disabled = false;
+      btn.innerText = "SUSCRIBIRSE";
+    }
+  });
+</script>

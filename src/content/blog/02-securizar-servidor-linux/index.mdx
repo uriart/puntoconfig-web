@@ -1,0 +1,84 @@
+---
+title: "Guía de Securización de un VPS: Cómo blindar tu servidor Linux"
+description: "Pasos esenciales para proteger tu servidor desde el minuto uno. SSH, Firewalls, 2FA y más."
+date: "2026-02-04"
+tags: ["linux", "seguridad", "vps", "sysadmin"]
+---
+
+¡Felicidades! Ya tienes tu nuevo VPS. Es un lienzo en blanco listo para albergar tus proyectos. Pero antes de empezar a instalar bases de datos o desplegar tu app en Docker, tenemos que hablar de seguridad.
+
+Internet es un lugar salvaje. Literalmente, a los pocos minutos de tener tu IP activa, habrá scripts automáticos intentando entrar por fuerza bruta. En este artículo vamos a ver cómo convertir tu servidor en una fortaleza (o al menos, en un sitio muy difícil de roer).
+
+---
+
+## 1. El ritual de bienvenida: Actualización y Usuarios
+
+Lo primero es lo primero. No construyas sobre cimientos viejos.
+
+### Mantén todo al día
+Antes de tocar nada, asegúrate de que el sistema operativo tiene los últimos parches de seguridad:
+`sudo apt update && sudo apt upgrade -y`
+
+### Configuración inicial
+Si estás configurando el servidor desde casa, **no abras puertos en tu router** hasta que el servidor esté listo. Además, asegúrate de configurar correctamente el archivo `/etc/fstab` si tienes discos adicionales y de instalar herramientas básicas como `man`.
+
+### Limita el uso de sudo
+No uses la cuenta de root para todo. Crea un usuario normal y añádelo al grupo de `sudo` (en Debian/Ubuntu) o `wheel` (en RedHat). Solo quienes necesiten permisos administrativos deberían estar ahí.
+
+---
+
+## 2. SSH: La puerta principal
+
+SSH es la forma en que entras a tu servidor, y por tanto, el objetivo número uno de los atacantes.
+
+### Olvida las contraseñas: Usa llaves SSH
+Las contraseñas se pueden adivinar; una llave RSA de 4096 bits o una Ed25519, no. 
+- La clave pública: Se queda en el servidor.
+- La clave privada: Se queda en tu ordenador (¡protégela con una contraseña!).
+
+### Configura un grupo de acceso
+No todos los usuarios del sistema deberían poder entrar por SSH. Crea un grupo específico (ej. `sshusers`) y configura tu servidor para que solo permita la entrada a sus miembros usando la directiva `AllowGroups` en `/etc/ssh/sshd_config`.
+
+### Cambia el puerto y prohíbe a Root
+1. Cambia el puerto 22: Usa uno aleatorio (ej. 2489). Esto eliminará el 99% del ruido de los bots básicos.
+2. Prohíbe el login de Root: En el archivo de configuración, pon `PermitRootLogin no`.
+
+---
+
+## 3. Doble Factor de Autenticación (2FA)
+
+¿Crees que con las llaves SSH es suficiente? Si quieres ser un ninja de la seguridad, añade MFA. 
+
+Usando el módulo `libpam-google-authenticator`, puedes hacer que el servidor te pida un código de 6 dígitos de tu móvil después de tu contraseña. Es una capa extra de protección: incluso si alguien te roba la contraseña, no tendrá tu móvil físico.
+
+---
+
+## 4. UFW y Fail2Ban
+
+### UFW (Uncomplicated Firewall)
+La regla de oro es: **Denegar todo por defecto, permitir solo lo necesario.** Con UFW puedes cerrar todos los puertos y solo abrir el de SSH, HTTP y HTTPS. 
+
+### Fail2Ban
+Fail2Ban es como un portero que anota quién intenta forzar la cerradura. Si una IP falla el login varias veces, Fail2Ban la banea automáticamente a nivel de firewall.
+
+---
+
+## 5. Actualizaciones automáticas y Alertas
+
+No vas a estar entrando en el servidor todos los días para ver si hay parches. 
+
+- unattended-upgrades: Instala automáticamente parches de seguridad críticos.
+- Apticron: Te envía un email cada vez que hay paquetes pendientes.
+- Alertas por Email: Configura un MTA (como Exim4) para que tu servidor pueda avisarte de eventos importantes.
+
+---
+
+## 6. Bonus: Consejos finales de supervivencia
+
+1. Backups: La seguridad no es solo evitar que entren, sino poder recuperarte si algo falla.
+2. Passwords fuertes: Usa `pam_pwquality` para obligar a usar contraseñas complejas.
+3. ClamAV: Un escáner de virus básico nunca está de más.
+
+## Conclusión
+
+Securizar un servidor es un proceso continuo. Siguiendo estos pasos, habrás pasado de tener un servidor vulnerable a uno altamente resistente.

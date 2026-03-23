@@ -29,11 +29,11 @@ export const PROJECTS: Metadata = {
 };
 
 export const SOCIALS: Socials = [
-  { 
+  /*{ 
     NAME: "twitter-x",
     HREF: "https://twitter.com/PuntoConfig",
   },
-  /*{ 
+  { 
     NAME: "github",
     HREF: "https://github.com/markhorn-dev"
   },
